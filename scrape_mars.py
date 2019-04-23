@@ -69,6 +69,7 @@ def scrape_info():
     dfFactsTables = pd.read_html(urlFacts)
     dfFactsTables = dfFactsTables[0]
     dfFactsTables.columns = ['Fact','Value']
+    dfFactsTables.set_index('Fact',inplace=True)
     htmlFactsTables = dfFactsTables.to_html()
     marsData['mars_facts'] = htmlFactsTables
 
