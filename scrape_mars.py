@@ -3,15 +3,23 @@ import requests
 from splinter import Browser
 import pandas as pd
 from IPython.core.display import display, HTML
-
+import pymongo
 
 def init_browser():
-    # @NOTE: Replace the path with your actual path to the chromedriver
-    executable_path = {"executable_path": "/usr/local/bin/chromedriver"}
+    executable_path = {'executable_path': 'chromedriver.exe'}
     return Browser("chrome", **executable_path, headless=False)
 
+def scrape_info():
+    ## Set up Mongo DB connection
+    conn = 'mongodb://localhost:27017'
+    client = pymongo.MongoClient(conn)
 
-def marsNews():
+    # Define the 'dbMars' database in Mongo
+    db = client.dbMars
+
+    marsData = {}
+
+    ##NASA Mars News
     urlMarsNews = 'https://mars.nasa.gov/news/'
     responseMarsNews = requests.get(urlMarsNews)
     soupMarsNews = BeautifulSoup(responseMarsNews.text, 'html.parser')
@@ -24,25 +32,25 @@ def marsNews():
             # Identify and return title of listing
             news_title = result.find('div', class_="content_title").text
             news_p = result.find('div', class_="rollover_description_inner").text
-
             # Print results only if title, price, and link are available
             if (news_title):
-                print('******************')
-                print(news_title + news_p)
+                marsData['news_title'] = news_title
+                marsData['news_p'] = news_p
+                exit
         except AttributeError as e:
             print(e)
 
-def marsImages():
+    ##JPL Mars Space Images - Featured Image
+    urlBaseMarsFeatureImg = 'https://www.jpl.nasa.gov'
+    urlMarsFeatureImg = 'https://www.jpl.nasa.gov/spaceimages/?search=&category=Mars'
     browser = init_browser()
     browser.visit(urlMarsFeatureImg)
     html = browser.html
     soupMarsSplinter = BeautifulSoup(html, 'html.parser')
     imgContMarsSplinter = soupMarsSplinter.find('article', class_='carousel_item')
-    featured_image_url = urlBaseMarsFeatureImg + imgContMarsSplinter.a['data-fancybox-href']
-    print('splinter method: ' + featured_image_url)
-    browser.visit(featured_image_url)
+    marsData['featured_image_url'] = urlBaseMarsFeatureImg + imgContMarsSplinter.a['data-fancybox-href']
 
-def marsWeather():
+    ## Mars Weather
     urlMarsTwitter = "https://twitter.com/marswxreport?lang=en"
     responseMarsTwitter = requests.get(urlMarsTwitter)
     soupMarsTwitter = BeautifulSoup(responseMarsTwitter.text, 'html.parser')
@@ -51,22 +59,21 @@ def marsWeather():
     for result in resultsMarsTwitter:
         try:
             if ('InSight' in result.find('p', class_="tweet-text").text):
-                mars_weather = result.find('p', class_="tweet-text").text
+                marsData['mars_weather'] = result.find('p', class_="tweet-text").text
                 exit
         except AttributeError as e:
             print(e)
-            
-    print('Latest weather on Mars: ' + mars_weather)
 
-def marsFacts():
+    ## Mars Facts
     urlFacts = "https://space-facts.com/mars/"
     dfFactsTables = pd.read_html(urlFacts)
     dfFactsTables = dfFactsTables[0]
     dfFactsTables.columns = ['Fact','Value']
     htmlFactsTables = dfFactsTables.to_html()
-    print(htmlFactsTables)
+    marsData['mars_facts'] = htmlFactsTables
 
-def marsHemisphere():
+
+    ## Mars Hemispheres
     browser = init_browser()
     urlHemi = 'https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars'
     browser.visit(urlHemi)
@@ -88,5 +95,6 @@ def marsHemisphere():
         urlTitle = soupHTML.find('h2',class_='title').text
         urlImg = 'https://astrogeology.usgs.gov'+soupHTML.find('img',class_='wide-image')['src']
         listDictHemi.append({'title':urlTitle,'img_url':urlImg})
-        
-    listDictHemi
+    marsData['hemi'] = listDictHemi
+
+    return marsData
