@@ -6,7 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Mission To Mars</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Space+Mono" rel="stylesheet"> 
 </head>
 
 <body>
@@ -41,10 +43,11 @@
         <h1 class="heading">Mars Hemispheres</h1>
       </div>
     </div>
-  </div>
+
   <div class="row">
-    <div class="col-md-12">
-      <div class="card-group">
+      <div class="col-md-12">
+    <div class="card-columns">
+
           {% for item in marsData.hemi %}
           <div class="card">
             <img class="card-img-top" src="{{item.img_url}}" alt="Card image cap">
@@ -53,9 +56,15 @@
             </div>
           </div>
           {% endfor %} 
-      </div>
     </div>
   </div>
+</div></div>
 </div>
+<style>
+h1,h2,h3,h4,h5{line-height: 1.5; font-weight:bold;font-family: 'Space Mono', monospace;}
+h1.heading{ margin: 25px 0; }
+.card-columns{column-count: 2;}
+table td{ padding: 5px;}
+table{background:#ff0000; color: #FFFFFF; border: 1px solid  #FFFFFF; text-align: center;}</style>
 </body>
 </html>
